@@ -1,113 +1,180 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <string.h>
 
+#include "queue.h"
+#include "stack.h"
+#include "list.h"
 
-
-// Para a Fila (Pedidos)
-typedef struct Pedido
+void clear_input_buffer()
 {
-    int id;
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF)
+    {
+    }
+}
+
+void read_line(char *buffer, int size)
+{
+    fgets(buffer, size, stdin);
+    buffer[strcspn(buffer, "\n")] = 0;
+}
+
+Queue *fila;
+Stack *pilha;
+List *insumos;
+
+void adicionar_pedido()
+{
     char prato[50];
-    struct Pedido *prox;
-} Pedido;
-// QUEUE
-typedef struct queue{
-    Pedido *head;
-    Pedido *tail;
-    int size;
-} Queue;
-// Inicializar a QUEUE/FILA
-Queue* start_queue() {
-    Queue* q = (Queue*) malloc(sizeof(Queue));
-    q->head = NULL;
-    q->tail = NULL;
-    q->size = 0;
+    int mesa;
 
-    return q;
+    printf("Nome do prato: ");
+    clear_input_buffer();
+    read_line(prato, sizeof(prato));
+
+    printf("Mesa: ");
+    scanf("%d", &mesa);
+
+    enqueue(fila, prato, mesa);
 }
-// Assinatura dos métodos
-void enqueue(Queue* q, char value);
-char dequeue(Queue* q);
-int size_queue(const Queue* q); // mudar nome na criação do método
-char head(const Queue* q);
-int empty_queue(const Queue* q); // mudar nome na criação do método
-void displayQueue(const Queue* q);
 
-
-
-
-
-// Para a Pilha (Pratos Sujos)
-typedef struct Prato
+void entregar_pedido()
 {
-    int id_tipo; // 1-Raso, 2-Fundo, etc.
-    char cor[20];
-    struct Prato *prox;
-} Prato;
-// STACK
-typedef struct stack{
-    Prato *top;
-    int size;
-} Stack;
-// Inicializar a STACK/PILHA
-Stack* start_stack() {
-    Stack *s = (Stack *) malloc(sizeof(Stack));
-    s->top = NULL;
-    s->size = 0;
+    Pedido *p = dequeue(fila);
+    if (!p)
+    {
+        printf("Fila vazia.\n");
+        return;
+    }
 
-    return s;
+    printf("Pedido entregue: %s (Mesa %d)\n", p->prato, p->mesa);
+    free(p);
 }
-// Assinatura dos métodos
-void push(Stack *s, char element);
-char top(Stack *s);
-char pop(Stack *s);
-int empty_stack(Stack *s); // mudar nome na criação do método
-int size_stack(const Stack *s); // // mudar nome na criação do método
 
+void adicionar_prato()
+{
+    int tipo;
+    char cor[20];
 
+    printf("Tipo do prato: ");
+    scanf("%d", &tipo);
+    clear_input_buffer();
 
+    printf("Cor do prato: ");
+    read_line(cor, sizeof(cor));
 
+    push(pilha, tipo, cor);
+}
 
-// Para a Lista (Ingredientes)
-typedef struct Insumo
+void lavar_prato()
+{
+    Prato *p = pop(pilha);
+    if (!p)
+    {
+        printf("Pilha vazia.\n");
+        return;
+    }
+
+    printf("Prato lavado: Tipo %d | Cor %s\n", p->id_tipo, p->cor);
+    free(p);
+}
+
+void novo_insumo()
 {
     char nome[50];
-    int quantidade;
-    struct Insumo *prox;
-} Insumo;
-// LIST
-typedef struct list{
-    Insumo *head;
-    int size;
-} List;
-// Inicializar LINKED_LIST/LISTA_ENCADEADA
-List* start_list() {
-    List *l = (List*)malloc(sizeof(List));
-    l->head = NULL;
-    l->size = 0;
+    int qtd;
 
-    return l;
+    clear_input_buffer();
+    printf("Nome do insumo: ");
+    read_line(nome, sizeof(nome));
+
+    printf("Quantidade: ");
+    scanf("%d", &qtd);
+
+    add_insumo(insumos, nome, qtd);
 }
-// Assinatura dos métodos
-void add(List *l, char character);
-void add_pos(List *l, char character, int position);
-char get(List *l, int position);
-void set(List *l, int position, char character);
-char delete(List *l, int position);
-int size(List *l);
-int empty(List *l);
-void print(List *l);
-void destroy(List *l);
 
-
-
-
-
-
-int main(int argc, char const *argv[])
+void remover_insumo()
 {
-    printf("Hello, world!\n");
+    int pos;
+    Insumo *rem;
+
+    printf("Posição: ");
+    scanf("%d", &pos);
+
+    if (remove_insumo_pos(insumos, pos, &rem))
+    {
+        printf("Removido: %s\n", rem->nome);
+        free(rem);
+    }
+    else
+    {
+        printf("Posição inválida.\n");
+    }
+}
+
+int main()
+{
+    fila = start_queue();
+    pilha = start_stack();
+    insumos = start_list();
+
+    int opcao;
+
+    do
+    {
+        printf("\n--- MENU ---\n");
+        printf("1 - Adicionar Pedido\n");
+        printf("2 - Entregar Pedido\n");
+        printf("3 - Receber Prato Sujo\n");
+        printf("4 - Lavar Prato\n");
+        printf("5 - Adicionar Insumo\n");
+        printf("6 - Remover Insumo\n");
+        printf("7 - Listar Pedidos\n");
+        printf("8 - Listar Pratos\n");
+        printf("9 - Listar Insumos\n");
+        printf("0 - Sair\n");
+        printf("Escolha: ");
+
+        scanf("%d", &opcao);
+
+        switch (opcao)
+        {
+        case 1:
+            adicionar_pedido();
+            break;
+        case 2:
+            entregar_pedido();
+            break;
+        case 3:
+            adicionar_prato();
+            break;
+        case 4:
+            lavar_prato();
+            break;
+        case 5:
+            novo_insumo();
+            break;
+        case 6:
+            remover_insumo();
+            break;
+        case 7:
+            displayQueue(fila);
+            break;
+        case 8:
+            displayStack(pilha);
+            break;
+        case 9:
+            display_list(insumos);
+            break;
+        }
+
+    } while (opcao != 0);
+
+    free_queue(fila);
+    free_stack(pilha);
+    free_list(insumos);
+
     return 0;
 }
