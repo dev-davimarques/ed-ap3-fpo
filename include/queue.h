@@ -1,12 +1,6 @@
 #ifndef QUEUE_H
 #define QUEUE_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-/*structs*/
-
 typedef struct Pedido {
     int id;
     char prato[50];
@@ -14,17 +8,19 @@ typedef struct Pedido {
     struct Pedido *prox;
 } Pedido;
 
-typedef struct Fila {
-    Pedido *inicio;
-    Pedido *fim;
-    int qtd;
-} Fila;
+typedef struct Queue {
+    Pedido *head;
+    Pedido *tail;
+    int size;
+} Queue;
 
-/* funções */
+Queue* start_queue();
+void enqueue(Queue* q, const char *prato, int mesa);
+Pedido* dequeue(Queue* q);
+int empty_queue(const Queue* q);
+int size_queue(const Queue* q);
+void displayQueue(const Queue* q);
+void free_queue(Queue *q);
 
-Fila* criarFila();
-void novoPedido(Fila *f, char prato[], int mesa);
-void entregarPedido(Fila *f);
-void listarFila(Fila *f);
 
 #endif
