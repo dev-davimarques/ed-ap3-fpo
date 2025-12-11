@@ -3,126 +3,81 @@
 #include <string.h>
 #include "queue.h"
 
-typedef struct Pedido {
-    int id;
-    char prato[50];
-    int mesa;
-    struct Pedido *prox;
-} Pedido;
-
-typedef struct Fila {
-    Pedido *inicio;
-    Pedido *fim;
-    int qtd;
-} Fila;
-
-Fila* criarFila() {
-    Fila *f = (Fila*) malloc(sizeof(Fila));
-    f->inicio = f->fim = NULL;
-    f->qtd = 0;
-    return f;
+Queue *start_queue()
+{
+    Queue *q = malloc(sizeof(Queue));
+    q->head = q->tail = NULL;
+    q->size = 0;
+    return q;
 }
 
-void novoPedido(Fila *f, char prato[], int mesa) {
-    Pedido *p = (Pedido*) malloc(sizeof(Pedido));
-    static int nextID = 1;
-
-    p->id = nextID++;
-    strcpy(p->prato, prato);
+void enqueue(Queue *q, const char *prato, int mesa)
+{
+    Pedido *p = malloc(sizeof(Pedido));
+    static int next_id = 1;
+    p->id = next_id++;
+    strncpy(p->prato, prato, sizeof(p->prato));
     p->mesa = mesa;
     p->prox = NULL;
 
-    if (f->fim == NULL) {
-        f->inicio = f->fim = p;
-    } else {
-        f->fim->prox = p;
-        f->fim = p;
+    if (q->tail == NULL)
+        q->head = q->tail = p;
+    else
+    {
+        q->tail->prox = p;
+        q->tail = p;
     }
-
-    f->qtd++;
-    printf("Pedido adicionado! ID:%d | Mesa:%d | Prato:%s\n", p->id, p->mesa, p->prato);
+    q->size++;
 }
 
-void entregarPedido(Fila *f) {
-    if (f->inicio == NULL) {
-        printf("Nenhum pedido na fila.\n");
-        return;
-    }
-
-    Pedido *p = f->inicio;
-    f->inicio = p->prox;
-
-    if (f->inicio == NULL)
-        f->fim = NULL;
-
-    printf("Pedido entregue! ID:%d | Mesa:%d | Prato:%s\n", p->id, p->mesa, p->prato);
-
-    free(p);
-    f->qtd--;
+Pedido *dequeue(Queue *q)
+{
+    if (q->head == NULL)
+        return NULL;
+    Pedido *p = q->head;
+    q->head = q->head->prox;
+    if (q->head == NULL)
+        q->tail = NULL;
+    q->size--;
+    return p;
 }
 
-void listarFila(Fila *f) {
-    if (f->inicio == NULL) {
+int empty_queue(const Queue *q)
+{
+    return q->size == 0;
+}
+
+int size_queue(const Queue *q)
+{
+    return q->size;
+}
+
+void displayQueue(const Queue *q)
+{
+    Pedido *cur = q->head;
+    if (!cur)
+    {
         printf("Fila vazia.\n");
         return;
     }
 
-    printf("\n--- Fila de Pedidos ---\n");
-    Pedido *aux = f->inicio;
-
-    while (aux != NULL) {
-        printf("ID:%d | Mesa:%d | Prato:%s\n", aux->id, aux->mesa, aux->prato);
-        aux = aux->prox;
+    printf("Pedidos:\n");
+    while (cur)
+    {
+        printf("ID %d | Mesa %d | Prato: %s\n", cur->id, cur->mesa, cur->prato);
+        cur = cur->prox;
     }
 }
 
-/*main*/
-
-int main() {
-    Fila *fila = criarFila();
-    int op, mesa;
-    char prato[50];
-
-    do {
-        printf("\n=========== RESTAURANTE ===========\n");
-        printf("1 – Novo Pedido\n");
-        printf("2 – Entregar Pedido\n");
-        printf("3 – Listar Fila\n");
-        printf("0 – Sair\n");
-        printf("Escolha: ");
-        scanf("%d", &op);
-
-        getchar(); // limpar 
-
-        switch (op) {
-            case 1:
-                printf("Nome do prato: ");
-                fgets(prato, 50, stdin);
-                prato[strcspn(prato, "\n")] = '\0';
-
-                printf("Número da mesa: ");
-                scanf("%d", &mesa);
-
-                novoPedido(fila, prato, mesa);
-                break;
-
-            case 2:
-                entregarPedido(fila);
-                break;
-
-            case 3:
-                listarFila(fila);
-                break;
-
-            case 0:
-                printf("Saindo...\n");
-                break;
-
-            default:
-                printf("Opção inválida!\n");
-        }
-
-    } while (op != 0);
-
-    return 0;
+void free_queue(Queue *q)
+{
+    Pedido *cur = q->head;
+    while (cur)
+    {
+        Pedido *tmp = cur;
+        cur = cur->prox;
+        free(tmp);
+    }
+    free(q);
 }
+
