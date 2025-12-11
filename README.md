@@ -108,10 +108,6 @@ make clean
 
 ---
 
-# Explicação para o Professor
-
-O projeto demonstra domínio de **modularização em C**, permitindo separar lógica, estrutura de dados e interface do programa.
-
 ## 📌 Estruturas implementadas
 ### 1. **Fila (Queue)**
 Usada para controlar pedidos que chegam ao restaurante. Implementada com ponteiros para `head` e `tail`, permitindo inserção e remoção em tempo constante.
@@ -122,14 +118,6 @@ Utilizada para empilhar pratos sujos. Implementada com inserção e remoção no
 ### 3. **Lista Encadeada (List)**
 Mantém os insumos do restaurante. Insere no final e permite remoção por posição.
 
-## 📌 Conceitos avaliados
-- **Alocação dinâmica (malloc/free)**
-- **Listas encadeadas, pilhas e filas**
-- **Modularização em C (arquivos .h e .c)**
-- **Passagem de ponteiros entre módulos**
-- **Organização de projeto**
-- **Uso adequado de header guards**
-
 ## 🧹 Gerenciamento de memória
 O programa evita vazamentos graças às funções:
 - `free_queue()`
@@ -137,8 +125,6 @@ O programa evita vazamentos graças às funções:
 - `free_list()`
 
 Chamadas no final da `main()`.
-
-Essas funções percorrem cada estrutura liberando todos os nós.
 
 ---
 
